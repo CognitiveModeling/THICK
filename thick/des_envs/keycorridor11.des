@@ -1,0 +1,16 @@
+MAZE: "mylevel", ' '
+FLAGS:premapped
+GEOMETRY:center,center
+
+MAP
+|.|
+|.|||||||||||
+|...........|
+|...........|
+|||||||||||||
+ENDMAP
+REGION:(0,0,80,80),lit,"ordinary"
+STAIR:(1, 0),down
+BRANCH: (1,2,1,2),(2,3,2,3)
+DOOR:locked,(1, 1)
+OBJECT:('(',"skeleton key"),(11,3),blessed,0,name:"The Master Key of Thievery"

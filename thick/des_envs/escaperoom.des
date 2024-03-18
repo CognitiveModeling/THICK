@@ -1,0 +1,24 @@
+MAZE: "mylevel", ' '
+FLAGS:premapped
+GEOMETRY:center,center
+
+MAP
+  |||||||
+  |.....|
+  |.|||L|
+  |W| |L|
+  |.|||.|
+|||.....|
+|.......|
+|||.....|
+  |||||||
+ENDMAP
+
+STAIR:(1, 6),down
+DOOR:locked,(2, 6)
+BRANCH: (7,7,7,7),(8,8,8,8)
+OBJECT:('(',"skeleton key"),(5,1),blessed
+OBJECT:('`',"boulder"),(3,2),blessed
+OBJECT:('=',"levitation"),(3, 7),blessed
+REGION:(0,0,80,80),lit,"ordinary"
+

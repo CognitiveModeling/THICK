@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco model="sawyer">
+   <include file="door_hook_config.xml"></include>
+    <worldbody>
+        <include file="sawyer_xyz_base_door_hook.xml"></include>
+        <site name="orig-target-site" pos="0.0 0.65 0.15" size="0.025"
+              rgba="0.2 0.1 0.1 0.0"/>
+        <site name="target-site" pos="0.0 0.7 0.125" size="0.025"
+              rgba="0.5 0.5 0.0 0.5"/>
+    </worldbody>
+
+    <actuator>
+        <motor joint="right_j0" ctrlrange="-100.0 100.0" ctrllimited="false"/>
+        <motor joint="right_j1" ctrlrange="-100.0 100.0" ctrllimited="false"/>
+        <motor joint="right_j2" ctrlrange="-100.0 100.0" ctrllimited="false"/>
+        <motor joint="right_j3" ctrlrange="-100.0 100.0" ctrllimited="false"/>
+        <motor joint="right_j4" ctrlrange="-100.0 100.0" ctrllimited="false"/>
+        <motor joint="right_j5" ctrlrange="-100.0 100.0" ctrllimited="false"/>
+        <motor joint="right_j6" ctrlrange="-100.0 100.0" ctrllimited="false"/>
+    </actuator>
+
+</mujoco>

@@ -1,0 +1,18 @@
+MAZE: "mylevel", ' '
+FLAGS:premapped
+INIT_MAP: solidfill,' '
+GEOMETRY:center,center
+MAP
+|--------------
+|.............|
+|.....|--------
+|.....|
+|.....|
+|-----|
+ENDMAP
+REGION:(0,0,80,80),lit,"ordinary"
+$safe_room = selection:fillrect (2,2,4,4)
+MONSTER:('H',"Minotaur"),(10,1),asleep
+OBJECT:('/',"death"),rndcoord($safe_room),blessed
+BRANCH:(1,1,1,1),(2,2,2,2)
+STAIR:(13,1),down

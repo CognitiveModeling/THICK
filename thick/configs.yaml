@@ -1,0 +1,381 @@
+defaults:
+
+  # Train Script
+  logdir: /dev/null
+  seed: 0
+  task: dmc_walker_walk
+  envs: 1
+  envs_parallel: none
+  render_size: [64, 64]
+  dmc_camera: -1
+  atari_grayscale: True
+  time_limit: 0
+  action_repeat: 1
+  steps: 1e8
+  log_every: 1e4
+  eval_every: 1e5
+  video_every: -1
+  eval_eps: 1
+  prefill: 10000
+  pretrain: 1
+  train_every: 5
+  train_steps: 1
+  expl_until: 0
+  replay: {capacity: 2e6, ongoing: False, minlen: 50, maxlen: 50, prioritize_ends: True}
+  dataset: {batch: 16, length: 50}
+  log_keys_video: ['image']
+  log_keys_sum: '^$'
+  log_keys_mean: '^$'
+  log_keys_max: '^$'
+  precision: 32
+  jit: True
+
+  # W&B
+  use_wandb: True
+  wandb:
+    key: YOURWANDBKEY
+    project: 'THICK'
+    entity: 'your_name'
+    id: None
+    offline: False
+
+  # Agent
+  clip_rewards: tanh
+  expl_behavior: greedy
+  expl_noise: 0.0
+  eval_noise: 0.0
+  eval_state_mean: False
+  eval_ctxt_mean: True
+
+
+  # World Model
+  grad_heads: [decoder, reward, discount]
+  pred_discount: True
+  c_rssm: False
+  context: {context: 16, ctxt_sample_noise: 0.05, ctxt_rnn_out_size: 1024, ctxt_always_sample: True, ctxt_rnn_type: 'SimpleGateL0RD'}
+  ctxt_grad_heads: [decoder, reward, discount]
+  rssm: {ensemble: 1, hidden: 1024, deter: 1024, stoch: 32, discrete: 32, act: elu, norm: none, std_act: sigmoid2, min_std: 0.1, rnn_norm: 'no_norm'}
+  encoder: {mlp_keys: '.*', cnn_keys: '.*', act: elu, norm: none, cnn_depth: 48, cnn_kernels: [4, 4, 4, 4], mlp_layers: [400, 400, 400, 400]}
+  decoder: {mlp_keys: '.*', cnn_keys: '.*', act: elu, norm: none, cnn_depth: 48, cnn_kernels: [5, 5, 6, 6], mlp_layers: [400, 400, 400, 400]}
+  reward_head: {layers: 4, units: 400, act: elu, norm: none, dist: mse}
+  discount_head: {layers: 4, units: 400, act: elu, norm: none, dist: binary}
+  loss_scales: {kl: 1.0, reward: 1.0, discount: 1.0, proprio: 1.0, ctxt_sparsity: 0.0, ctxt_kl: 1.0, ctxt_reward: 1.0, ctxt_discount: 1.0, ctxt_image: 1.0, }
+  kl: {free: 0.0, forward: False, balance: 0.8, free_avg: True}
+  ctxt_kl: {free: 0.0, forward: False, balance: 0.8, free_avg: True}
+  model_opt: {opt: adam, lr: 1e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+
+  # THICK Net
+  hierarchical: False
+  thick_opt: {opt: adam, lr: 1e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+  thick_kl: {free: 0.0, forward: False, balance: 1.0, free_avg: True}
+  thick_hl_act_kl: {free: 0.0, forward: False, balance: 0.8, free_avg: True}
+  thick_loss_scales: {thick_kl: 1.0, thick_act: 1.0, thick_time: 1.0, thick_hl_act_kl: 1.0}
+  thick_segment_crit: ['gates', 'ends']
+  thick_hl_act_dim: 5
+  thick_act_pred_loss: "CCEL_logits"
+  thick_feat: 1024
+  thick_readouts: {sample_skip: False, layers: 2, units: 1024}
+
+  # Actor Critic
+  actor: {layers: 4, units: 400, act: elu, norm: none, dist: auto, min_std: 0.1}
+  critic: {layers: 4, units: 400, act: elu, norm: none, dist: mse}
+  actor_opt: {opt: adam, lr: 8e-5, eps: 1e-5, clip: 100, wd: 1e-6}
+  critic_opt: {opt: adam, lr: 2e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+  discount: 0.99
+  discount_lambda: 0.95
+  imag_horizon: 15
+  actor_grad: auto
+  actor_grad_mix: 0.1
+  actor_ent: 2e-3
+  slow_target: True
+  slow_target_update: 100
+  slow_target_fraction: 1
+  slow_baseline: True
+  reward_norm: {momentum: 1.0, scale: 1.0, eps: 1e-8}
+  actor_seq_inp: 'feat'
+
+  # THICK actor critic
+  thick_imag_horizon: 15
+  thick_dreamer: False
+  critic_psi: 0.9
+
+  # Exploration
+  expl_intr_scale: 1.0
+  expl_extr_scale: 0.0
+  expl_opt: {opt: adam, lr: 3e-4, eps: 1e-5, clip: 100, wd: 1e-6}
+  expl_head: {layers: 4, units: 400, act: elu, norm: none, dist: mse}
+  expl_reward_norm: {momentum: 1.0, scale: 1.0, eps: 1e-8}
+  disag_target: stoch
+  disag_log: False
+  disag_models: 10
+  disag_offset: 1
+  disag_action_cond: True
+  expl_model_loss: kl
+
+  # Loading
+  load_dir: None # load replay buffers and agent from here
+
+  # MPC
+  train_plan: False
+  eval_plan: False
+  mcts: {num_simulations: 100, discount: 0.997, root_dirichlet_alpha: 0.25, root_exploration_fraction: 0.25, random_rollouts: 0, rollout_depth: 20, rollout_value_factor: 0.01, state_sample: True}
+  cem: {amount: 1000, horizon: 12, topk: 100, iterations: 10, keep_elites: 0, shift_elites: False, discount_rewards: False, reward_factor: 1.0, bonus_factor: 0.0}
+  plan_reward_norm: {momentum: 0.9, scale: 1.0, eps: 1e-8}
+  hl_plan: False
+  hl_goal_distance: 'logit' # 'stoch', 'prob', 'KL'
+  hl_replan_every: False
+  hl_plan_pre_ll_goal: True
+  hl_replan_inhibt_t: 3
+
+
+minigrid:
+
+  task: Minigrid_1room
+  action_repeat: 1
+  steps: 100000000
+  eval_every: 100000
+  eval_eps: 1
+  log_every: 1000
+  prefill: 100000
+  train_every: 10
+  expl_behavior: greedy
+  actor_ent: 1e-3
+
+atari:
+
+  task: atari_pong
+  encoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  time_limit: 27000
+  action_repeat: 4
+  steps: 5e7
+  eval_every: 2.5e5
+  log_every: 1e4
+  prefill: 50000
+  train_every: 16
+  clip_rewards: tanh
+  rssm: {hidden: 600, deter: 600}
+  model_opt.lr: 2e-4
+  actor_opt.lr: 4e-5
+  critic_opt.lr: 1e-4
+  actor_ent: 1e-3
+  discount: 0.999
+  loss_scales.kl: 0.1
+  loss_scales.discount: 5.0
+
+crafter:
+
+  task: crafter_reward
+  encoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  log_keys_max: '^log_achievement_.*'
+  log_keys_sum: '^log_reward$'
+  rssm: {hidden: 1024, deter: 1024}
+  discount: 0.999
+  model_opt.lr: 1e-4
+  actor_opt.lr: 1e-4
+  critic_opt.lr: 1e-4
+  actor_ent: 3e-3
+  .*\.norm: layer
+
+dmc_vision:
+
+  task: dmc_walker_walk
+  encoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  action_repeat: 2
+  eval_every: 1e4
+  prefill: 1000
+  pretrain: 100
+  clip_rewards: identity
+  pred_discount: False
+  replay.prioritize_ends: False
+  grad_heads: [decoder, reward]
+  rssm: {hidden: 200, deter: 200}
+  model_opt.lr: 3e-4
+  actor_opt.lr: 8e-5
+  critic_opt.lr: 8e-5
+  actor_ent: 1e-4
+  kl.free: 1.0
+
+
+dmc_proprio:
+
+  task: dmc_walker_walk
+  encoder: {mlp_keys: '.*', cnn_keys: '$^'}
+  decoder: {mlp_keys: '.*', cnn_keys: '$^'}
+  action_repeat: 2
+  eval_every: 1e4
+  prefill: 1000
+  pretrain: 100
+  clip_rewards: identity
+  pred_discount: False
+  replay.prioritize_ends: False
+  grad_heads: [decoder, reward]
+  rssm: {hidden: 200, deter: 200}
+  model_opt.lr: 3e-4
+  actor_opt.lr: 8e-5
+  critic_opt.lr: 8e-5
+  actor_ent: 1e-4
+  kl.free: 1.0
+
+
+minihack:
+
+  taskk: "Minihack_keyroomfixed5"
+  encoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  decoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  log_keys_max: 'log_success'
+  eval_every: 10000
+  rssm: {hidden: 256, deter: 256 }
+  steps: 1e6
+  ctxt_grad_heads: [decoder, reward, discount]
+
+
+multiworld:
+
+  task: "MultiWorld_doorhook"
+  encoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  decoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  eval_every: 10000
+  steps: 1e6
+  grad_heads: [ decoder, reward ]
+  rssm: { hidden: 256, deter: 256 }
+  ctxt_grad_heads: [decoder, reward]
+  pred_discount: False
+  replay.prioritize_ends: False
+  thick_segment_crit: ['gates']
+
+
+visualpinpad:
+
+  task: "pinpad_three"
+  encoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  decoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  eval_every: 10000
+  steps: 1e6
+  grad_heads: [ decoder, reward ]
+  rssm: { hidden: 256, deter: 256 }
+  ctxt_grad_heads: [decoder, reward]
+  pred_discount: False
+  replay.prioritize_ends: False
+  thick_segment_crit: ['gates']
+
+
+plan2explore:
+  rssm: {hidden: 256, deter: 256 }
+  expl_behavior: "Plan2Explore"
+  expl_until: 1e6
+  steps: 1e6
+  pred_discount: False
+  replay.prioritize_ends: False
+  grad_heads: [ decoder ]
+
+
+thick:
+
+  c_rssm: True
+  context: {context: 16, ctxt_sample_noise: 0.1, ctxt_rnn_out_size: 256, ctxt_always_sample: True }
+  loss_scales: {kl: 1.0, reward: 1.0, proprio: 1.0, ctxt_sparsity: 1.0, ctxt_kl: 1.0, ctxt_reward: 1.0, ctxt_discount: 1.0, ctxt_image: 1.0,}
+  hierarchical: True
+
+
+thick_planet:
+
+  train_plan: True
+  eval_plan: True
+  hl_plan: True
+  thick_loss_scales: {thick_kl: 1.0, thick_act: 0.1, thick_time: 0.1, thick_hl_act_kl: 1.0}
+  cem.bonus_factor: 0.025
+
+
+default_thick:
+
+  c_rssm: True
+  context: {context: 16, ctxt_sample_noise: 0.1, ctxt_rnn_out_size: 256, ctxt_always_sample: True }
+  loss_scales: {kl: 1.0, reward: 1.0, proprio: 1.0, ctxt_sparsity: 1.0, ctxt_kl: 1.0, ctxt_reward: 1.0, ctxt_discount: 1.0, ctxt_image: 1.0,}
+  eval_every: 10000
+  rssm: {hidden: 256, deter: 256 }
+  steps: 1e6
+  ctxt_grad_heads: [decoder, reward]
+  replay: {minlen: 50, maxlen: 50}
+  pred_discount: False
+  replay.prioritize_ends: False
+  grad_heads: [ decoder, reward ]
+  thick_segment_crit: ['gates']
+  hierarchical: True
+
+
+thick_minihack:
+
+  encoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  decoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  log_keys_max: 'log_success'
+  c_rssm: True
+  context: {context: 16, ctxt_sample_noise: 0.1, ctxt_rnn_out_size: 256, ctxt_always_sample: True }
+  loss_scales: {kl: 1.0, reward: 1.0, proprio: 1.0, ctxt_sparsity: 10.0, ctxt_kl: 1.0, ctxt_reward: 1.0, ctxt_discount: 1.0, ctxt_image: 1.0,}
+  eval_every: 10000
+  rssm: {hidden: 256, deter: 256 }
+  steps: 1e6
+  ctxt_grad_heads: [decoder, reward, discount]
+  hierarchical: True
+  thick_hl_act_dim: 3
+  thick_dreamer: True
+
+
+thick_pinpad:
+
+  task: "pinpad_three"
+  encoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  decoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  eval_every: 10000
+  pred_discount: False
+  steps: 1e6
+  grad_heads: [ decoder, reward ]
+  ctxt_grad_heads: [decoder, reward]
+  thick_segment_crit: [ 'gates' ]
+  replay.prioritize_ends: False
+  c_rssm: True
+  context: {context: 16, ctxt_sample_noise: 0.1, ctxt_rnn_out_size: 256, ctxt_always_sample: True }
+  loss_scales: {kl: 1.0, reward: 1.0, proprio: 1.0, ctxt_sparsity: 1.0, ctxt_kl: 1.0, ctxt_reward: 1.0, ctxt_discount: 1.0, ctxt_image: 1.0,}
+  rssm: {hidden: 256, deter: 256 }
+  hierarchical: True
+  thick_loss_scales: { thick_kl: 1.0, thick_act: 0.1, thick_time: 0.1, thick_hl_act_kl: 1.0 }
+  thick_hl_act_dim: 5
+  thick_dreamer: True
+
+
+thick_multiworld:
+
+  encoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  decoder: { mlp_keys: '$^', cnn_keys: 'image' }
+  eval_every: 10000
+  rssm: {hidden: 256, deter: 256 }
+  steps: 1e6
+  pred_discount: False
+  grad_heads: [ decoder, reward ]
+  thick_segment_crit: ['gates']
+  replay.prioritize_ends: False
+  c_rssm: True
+  context: {context: 16, ctxt_sample_noise: 0.1, ctxt_rnn_out_size: 256, ctxt_always_sample: True }
+  loss_scales: {kl: 1.0, reward: 1.0, proprio: 1.0, ctxt_sparsity: 25.0, ctxt_kl: 1.0, ctxt_reward: 1.0, ctxt_discount: 1.0, ctxt_image: 1.0,}
+  ctxt_grad_heads: [decoder, reward]
+  hierarchical: True
+  train_plan: True
+  eval_plan: True
+  hl_plan: True
+  thick_loss_scales: { thick_kl: 1.0, thick_act: 0.1, thick_time: 0.1, thick_hl_act_kl: 1.0 }
+  cem.bonus_factor: 0.025
+
+
+debug:
+
+  jit: False
+  time_limit: 100
+  eval_every: 300
+  log_every: 300
+  prefill: 100
+  pretrain: 1
+  train_steps: 1
+  replay: {minlen: 10, maxlen: 30}
+  dataset: {batch: 10, length: 10}
